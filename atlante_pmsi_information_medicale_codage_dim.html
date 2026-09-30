@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLANTE PMSI - Département d'Information Médicale (DIM)</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tealwater: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                            950: '#042f2e',
+                        },
+                        ice: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom subtle scrollbars for water blue theme */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f0fdfa; }
+        ::-webkit-scrollbar-thumb { background: #99f6e4; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0d9488; }
+        
+        .badge-ghm {
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 bg-slate-50 flex flex-col antialiased select-none overflow-hidden">
+
+    <!-- Top Header: Institutional ATLANTE DIM Branding -->
+    <header class="bg-gradient-to-r from-tealwater-900 via-tealwater-800 to-tealwater-900 text-white px-6 py-3 border-b border-tealwater-700 shadow-md shrink-0 z-30 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-tealwater-400 to-ice-100 p-0.5 shadow-md">
+                <div class="w-full h-full bg-tealwater-950 rounded-[10px] flex items-center justify-center">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5 text-tealwater-300"></i>
+                </div>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="font-extrabold text-white text-lg tracking-tight">ATLANTE <span class="text-tealwater-300 font-light">PMSI</span></span>
+                    <span class="bg-tealwater-700 text-tealwater-100 font-mono text-[10px] px-2 py-0.5 rounded-full border border-tealwater-500/40">v2026.4 - DIM</span>
+                </div>
+                <p class="text-[11px] text-tealwater-200/90 font-medium leading-none">Centre Hospitalier Métropolitain • Progiciel de Cotation & Traitement des Données T2A</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="bg-tealwater-950/60 border border-tealwater-600/50 rounded-xl px-3 py-1.5 flex items-center gap-3 text-xs">
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-tealwater-300"></i>
+                    <span class="text-tealwater-200 font-mono">Mois M09 - Session 2026</span>
+                </div>
+                <span class="text-tealwater-600">|</span>
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    <span class="text-emerald-300 font-semibold">Norme OVALIDE Validée</span>
+                </div>
+            </div>
+
+            <button onclick="exportPMSIXML()" class="bg-tealwater-500 hover:bg-tealwater-400 text-tealwater-950 font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>Export e-PMSI (XML)</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Top KPI Dashboard Bar -->
+    <section class="bg-white border-b border-tealwater-100 px-6 py-2.5 shrink-0 shadow-xs">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="flex items-center gap-3 bg-tealwater-50/60 border border-tealwater-100 p-2.5 rounded-xl">
+                <div class="w-9 h-9 rounded-lg bg-tealwater-500/15 text-tealwater-700 flex items-center justify-center shrink-0">
+                    <i data-lucide="bed-double" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-tealwater-700">Total Séjours M09</div>
+                    <div class="text-lg font-extrabold text-tealwater-950 font-mono" id="kpiTotalSejours">1 248</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 bg-tealwater-50/60 border border-tealwater-100 p-2.5 rounded-xl">
+                <div class="w-9 h-9 rounded-lg bg-tealwater-500/15 text-tealwater-700 flex items-center justify-center shrink-0">
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>
+                </div>
+                <div>
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-tealwater-700">Taux de Codage DIM</div>
+                    <div class="text-lg font-extrabold text-emerald-700 font-mono" id="kpiTauxCodage">96.4 %</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 bg-tealwater-50/60 border border-tealwater-100 p-2.5 rounded-xl">
+                <div class="w-9 h-9 rounded-lg bg-tealwater-500/15 text-tealwater-700 flex items-center justify-center shrink-0">
+                    <i data-lucide="coins" class="w-5 h-5 text-amber-600"></i>
+                </div>
+                <div>
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-tealwater-700">Recettes Valorisées T2A</div>
+                    <div class="text-lg font-extrabold text-tealwater-950 font-mono" id="kpiValorisation">4 892 450 €</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 bg-rose-50 border border-rose-100 p-2.5 rounded-xl">
+                <div class="w-9 h-9 rounded-lg bg-rose-500/15 text-rose-700 flex items-center justify-center shrink-0">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-600"></i>
+                </div>
+                <div>
+                    <div class="text-[10px] font-bold uppercase tracking-wider text-rose-800">Anomalies DATIM / OVALIDE</div>
+                    <div class="text-lg font-extrabold text-rose-700 font-mono" id="kpiAnomalies">3 Séjours</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Workspace -->
+    <div class="flex-1 flex min-h-0 overflow-hidden">
+
+        <!-- Left Navigation Sidebar -->
+        <aside class="w-64 bg-tealwater-950 text-white border-r border-tealwater-800 flex flex-col justify-between shrink-0">
+            <div class="p-3 space-y-1 overflow-y-auto">
+                <div class="px-3 py-2 text-[10px] font-bold text-tealwater-400 uppercase tracking-wider">Modules de Cotation DIM</div>
+
+                <button onclick="switchTab('rum')" id="tab-btn-rum" class="w-full text-left px-3 py-2.5 rounded-xl font-medium text-xs flex items-center gap-3 transition-all bg-tealwater-600 text-white font-bold shadow-sm">
+                    <i data-lucide="file-text" class="w-4 h-4 text-tealwater-200"></i>
+                    <span>Saisie & Validation RUM</span>
+                </button>
+
+                <button onclick="switchTab('controle')" id="tab-btn-controle" class="w-full text-left px-3 py-2.5 rounded-xl font-medium text-xs flex items-center justify-between transition-all text-tealwater-200 hover:bg-tealwater-900">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
+                        <span>Contrôle Qualité DATIM</span>
+                    </div>
+                    <span class="bg-rose-600 text-white font-mono text-[10px] px-1.5 py-0.2 rounded-full">3</span>
+                </button>
+
+                <button onclick="switchTab('t2a')" id="tab-btn-t2a" class="w-full text-left px-3 py-2.5 rounded-xl font-medium text-xs flex items-center gap-3 transition-all text-tealwater-200 hover:bg-tealwater-900">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-tealwater-300"></i>
+                    <span>Valorisation T2A & GHM</span>
+                </button>
+
+                <button onclick="switchTab('export')" id="tab-btn-export" class="w-full text-left px-3 py-2.5 rounded-xl font-medium text-xs flex items-center gap-3 transition-all text-tealwater-200 hover:bg-tealwater-900">
+                    <i data-lucide="file-output" class="w-4 h-4 text-tealwater-300"></i>
+                    <span>Export e-PMSI / AGRAF</span>
+                </button>
+            </div>
+
+            <!-- Footer DIM Service info -->
+            <div class="p-3 bg-tealwater-900 border-t border-tealwater-800 text-[11px] text-tealwater-300">
+                <div class="font-bold text-white">Pr. L. VIALATTE</div>
+                <div>Médecin Chef du DIM</div>
+                <div class="text-[10px] text-tealwater-400 font-mono mt-1">GHS Tarifs MCO 2026.1</div>
+            </div>
+        </aside>
+
+        <!-- Right Main View Slot -->
+        <main class="flex-1 bg-slate-100 p-5 overflow-y-auto">
+
+            <!-- TAB 1: SAISIE & VALIDATION RUM -->
+            <div id="view-rum" class="space-y-4 block">
+                
+                <!-- Search & Filters Header -->
+                <div class="bg-white border border-tealwater-100 rounded-xl p-3.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 flex-1 min-w-[280px]">
+                        <div class="relative w-full">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+                            <input type="text" id="searchInput" oninput="filterStays()" placeholder="Rechercher IPP, NDA, Nom du patient, Diagnostic ou Acte CCAM..." class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:border-tealwater-500">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 text-xs">
+                        <select id="filterStatus" onchange="filterStays()" class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium">
+                            <option value="ALL">Tous les Statuts</option>
+                            <option value="Codé">Statut: Codé DIM</option>
+                            <option value="À contrôler">Statut: À contrôler</option>
+                            <option value="Erreur DATIM">Statut: Erreur DATIM</option>
+                        </select>
+
+                        <select id="filterService" onchange="filterStays()" class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium">
+                            <option value="ALL">Tous les Services</option>
+                            <option value="Cardiologie">Cardiologie</option>
+                            <option value="Chirurgie Viscérale">Chirurgie Viscérale</option>
+                            <option value="Pneumologie">Pneumologie</option>
+                            <option value="Orthopédie">Orthopédie</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Patient Stay / RUM Table -->
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+                    <div class="p-3.5 bg-tealwater-50/50 border-b border-tealwater-100 flex justify-between items-center">
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-tealwater-900 flex items-center gap-2">
+                            <i data-lucide="list" class="w-4 h-4 text-tealwater-600"></i>
+                            Résumés d'Unité Médicale (RUM) à Codifier
+                        </h2>
+                        <span class="text-xs text-slate-500 font-mono" id="stayCountLabel">4 Séjours affichés</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+                                    <th class="p-3">Patient & IPP / NDA</th>
+                                    <th class="p-3">Service & Dates</th>
+                                    <th class="p-3">Diagnostics (CIM-10)</th>
+                                    <th class="p-3">Actes (CCAM)</th>
+                                    <th class="p-3">Groupe GHM & Sévérité</th>
+                                    <th class="p-3 text-right">Valorisation T2A</th>
+                                    <th class="p-3 text-center">Statut</th>
+                                    <th class="p-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-rum" class="divide-y divide-slate-100 font-medium">
+                                <!-- Populated dynamically by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: CONTRÔLE QUALITÉ & DATIM -->
+            <div id="view-controle" class="space-y-4 hidden">
+                <div class="bg-white border border-rose-200 rounded-xl p-5 shadow-xs">
+                    <div class="flex items-center justify-between border-b border-rose-100 pb-3 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
+                                <i data-lucide="alert-octagon" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900">Module de Contrôle Qualité DATIM & OVALIDE</h2>
+                                <p class="text-xs text-slate-500">Détection automatique des incohérences de codage et des risques de rejet de facturation T2A</p>
+                            </div>
+                        </div>
+                        <span class="bg-rose-100 text-rose-800 text-xs font-bold font-mono px-3 py-1 rounded-full border border-rose-300">
+                            3 Anomalies bloquantes
+                        </span>
+                    </div>
+
+                    <div class="space-y-3" id="datimAlertsList">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: VALORISATION T2A -->
+            <div id="view-t2a" class="space-y-4 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Specialty Revenue Card -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 flex items-center gap-2">
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-tealwater-600"></i>
+                            Répartition des Recettes T2A par Discipline
+                        </h3>
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <div class="flex justify-between font-semibold mb-1">
+                                    <span>Cardiologie / USIC</span>
+                                    <span class="font-mono text-tealwater-800">1 845 200 € (37.7%)</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-tealwater-600 h-full rounded-full" style="width: 37.7%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between font-semibold mb-1">
+                                    <span>Chirurgie Viscérale & Digestive</span>
+                                    <span class="font-mono text-tealwater-800">1 420 100 € (29.0%)</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-tealwater-500 h-full rounded-full" style="width: 29.0%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between font-semibold mb-1">
+                                    <span>Orthopédie & Traumatologie</span>
+                                    <span class="font-mono text-tealwater-800">980 400 € (20.0%)</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-tealwater-400 h-full rounded-full" style="width: 20.0%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between font-semibold mb-1">
+                                    <span>Pneumologie & Infectiologie</span>
+                                    <span class="font-mono text-tealwater-800">646 750 € (13.3%)</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-tealwater-300 h-full rounded-full" style="width: 13.3%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Severity Levels Breakdown -->
+                    <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-xs">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700 mb-4 flex items-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4 text-tealwater-600"></i>
+                            Ventilation des Niveaux de Sévérité GHM (N1 à N4)
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3 font-mono">
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-center">
+                                <div class="text-[10px] text-slate-500 font-sans font-bold uppercase">Niveau 1 (Sans Complication)</div>
+                                <div class="text-xl font-bold text-slate-800 mt-1">540 RUM</div>
+                                <div class="text-[10px] text-tealwater-700 font-sans">43.2% du total</div>
+                            </div>
+
+                            <div class="p-3 bg-tealwater-50 border border-tealwater-200 rounded-lg text-center">
+                                <div class="text-[10px] text-tealwater-800 font-sans font-bold uppercase">Niveau 2 (Complication)</div>
+                                <div class="text-xl font-bold text-tealwater-900 mt-1">412 RUM</div>
+                                <div class="text-[10px] text-tealwater-700 font-sans">33.0% du total</div>
+                            </div>
+
+                            <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-center">
+                                <div class="text-[10px] text-amber-800 font-sans font-bold uppercase">Niveau 3 (Complication Sévère)</div>
+                                <div class="text-xl font-bold text-amber-900 mt-1">210 RUM</div>
+                                <div class="text-[10px] text-amber-700 font-sans">16.8% du total</div>
+                            </div>
+
+                            <div class="p-3 bg-rose-50 border border-rose-200 rounded-lg text-center">
+                                <div class="text-[10px] text-rose-800 font-sans font-bold uppercase">Niveau 4 (Très Sévère / Décès)</div>
+                                <div class="text-xl font-bold text-rose-900 mt-1">86 RUM</div>
+                                <div class="text-[10px] text-rose-700 font-sans">6.9% du total</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: EXPORT DATA -->
+            <div id="view-export" class="space-y-4 hidden">
+                <div class="bg-white border border-tealwater-200 rounded-xl p-6 shadow-xs max-w-2xl mx-auto text-center">
+                    <div class="w-16 h-16 bg-tealwater-100 text-tealwater-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="file-output" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-900 mb-1">Génération du Fichier e-PMSI / AGRAF MCO</h2>
+                    <p class="text-xs text-slate-500 mb-6">Export conforme au format XML réglementaire pour télétransmission au serveur national ATIH</p>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left font-mono text-xs space-y-2 mb-6">
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Format de fichier:</span>
+                            <span class="font-bold text-slate-800">XML Standard ATIH v2026</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Nombre de RUM inclus:</span>
+                            <span class="font-bold text-tealwater-700">4 Séjours (Échantillon actif)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Horodatage de la session:</span>
+                            <span class="font-bold text-slate-800">30/09/2026 - 18:42</span>
+                        </div>
+                    </div>
+
+                    <button onclick="exportPMSIXML()" class="w-full bg-tealwater-600 hover:bg-tealwater-700 text-white font-bold py-3 px-6 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="download" class="w-5 h-5"></i>
+                        <span>Télécharger le Fichier RUM/GHM XML (.xml)</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Add Diagnosis/Procedure Modal -->
+    <div id="modalAddCode" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white border border-tealwater-200 rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+            <div class="p-4 bg-tealwater-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-xs uppercase tracking-wider" id="modalTitle">Ajouter un Code Médical (DIM)</h3>
+                <button onclick="closeCodeModal()" class="text-tealwater-200 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <form onsubmit="saveCode(event)" class="p-4 space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Catégorie de Cotation</label>
+                    <select id="codeType" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-medium">
+                        <option value="CIM10_DAS">Diagnostic Associé (DAS - CIM-10)</option>
+                        <option value="CCAM">Acte Opératoire / Diagnostic (CCAM)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Code Médical Officiel</label>
+                    <input type="text" id="codeVal" required placeholder="Ex: E11.9 ou HFFD014" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-mono uppercase font-bold focus:outline-none focus:border-tealwater-500">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Libellé Officiel PMSI</label>
+                    <input type="text" id="codeLabel" required placeholder="Ex: Diabète de type 2 sans complication" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 font-medium focus:outline-none focus:border-tealwater-500">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeCodeModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-semibold">Annuler</button>
+                    <button type="submit" class="px-4 py-2 bg-tealwater-600 hover:bg-tealwater-700 text-white rounded-lg font-bold shadow-sm">Valider & Recalculer GHM</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /* PMSI RUM Datasets */
+        const pmsiStays = [
+            {
+                id: "RUM-2026-001",
+                patient: "DUBOIS Jean-Marc",
+                ipp: "80039214",
+                nda: "2026-99412",
+                ageSexe: "67 ans • M",
+                service: "Cardiologie",
+                entryMode: "Urgence",
+                dates: "24/09/2026 - 29/09/2026 (5j)",
+                dp: { code: "I21.0", label: "Infarctus aigu du myocarde transmural de la paroi antérieure" },
+                das: [{ code: "I10", label: "Hypertension artérielle essentielle" }],
+                ccam: [{ code: "DGKP002", label: "Coronarographie par voie artérielle radiale" }],
+                ghm: "05M092",
+                ghmLabel: "Infarctus du myocarde, niveau 2",
+                severity: 2,
+                t2aTarif: 4850,
+                status: "Codé"
+            },
+            {
+                id: "RUM-2026-002",
+                patient: "MOREAU Élodie",
+                ipp: "80041289",
+                nda: "2026-99501",
+                ageSexe: "42 ans • F",
+                service: "Chirurgie Viscérale",
+                entryMode: "Urgence",
+                dates: "27/09/2026 - 29/09/2026 (2j)",
+                dp: { code: "K35.8", label: "Appendicite aiguë, autre et non précisée" },
+                das: [],
+                ccam: [{ code: "HFFD014", label: "Appendicectomie par cœlioscopie" }],
+                ghm: "06C041",
+                ghmLabel: "Appendicectomies, niveau 1",
+                severity: 1,
+                t2aTarif: 2340,
+                status: "Codé"
+            },
+            {
+                id: "RUM-2026-003",
+                patient: "BENOÎT Pierre",
+                ipp: "80010943",
+                nda: "2026-98210",
+                ageSexe: "78 ans • M",
+                service: "Pneumologie",
+                entryMode: "Hospitalisation",
+                dates: "20/09/2026 - 29/09/2026 (9j)",
+                dp: { code: "J18.9", label: "Pneumopathie bactérienne, non précisée" },
+                das: [
+                    { code: "E11.9", label: "Diabète de type 2 sans complication" },
+                    { code: "I50.0", label: "Insuffisance cardiaque congestive" }
+                ],
+                ccam: [{ code: "GEEA005", label: "Électrocardiographie sur au moins 12 dérivations" }],
+                ghm: "04M023",
+                ghmLabel: "Infections respiratoires, niveau 3",
+                severity: 3,
+                t2aTarif: 5120,
+                status: "À contrôler"
+            },
+            {
+                id: "RUM-2026-004",
+                patient: "GIRARD Françoise",
+                ipp: "80055102",
+                nda: "2026-99630",
+                ageSexe: "83 ans • F",
+                service: "Orthopédie",
+                entryMode: "Urgence",
+                dates: "18/09/2026 - 28/09/2026 (10j)",
+                dp: { code: "S72.0", label: "Fracture du col du fémur" },
+                das: [{ code: "I10", label: "Hypertension artérielle" }],
+                ccam: [], // Missing CCAM for surgical stay alert!
+                ghm: "08C482",
+                ghmLabel: "Prothèses de hanche pour fracture, niveau 2",
+                severity: 2,
+                t2aTarif: 6780,
+                status: "Erreur DATIM"
+            }
+        ];
+
+        let activeStayIndex = 0;
+
+        function renderRUMTable(stays = pmsiStays) {
+            const tbody = document.getElementById("tbody-rum");
+            document.getElementById("stayCountLabel").innerText = `${stays.length} Séjours affichés`;
+
+            tbody.innerHTML = stays.map((s, idx) => `
+                <tr class="hover:bg-tealwater-50/40 transition-all border-b border-slate-100">
+                    <td class="p-3">
+                        <div class="font-bold text-slate-900">${s.patient}</div>
+                        <div class="text-[10px] text-slate-500 font-mono">IPP: ${s.ipp} • NDA: ${s.nda}</div>
+                        <div class="text-[10px] text-tealwater-700 font-bold">${s.ageSexe}</div>
+                    </td>
+
+                    <td class="p-3">
+                        <div class="font-semibold text-slate-800">${s.service}</div>
+                        <div class="text-[10px] text-slate-500 font-mono">${s.dates}</div>
+                        <span class="text-[9px] bg-slate-100 px-1.5 py-0.2 rounded text-slate-600 font-medium">${s.entryMode}</span>
+                    </td>
+
+                    <td class="p-3 max-w-[220px]">
+                        <div class="mb-1">
+                            <span class="bg-tealwater-700 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded">DP</span>
+                            <span class="font-mono text-xs font-bold text-tealwater-950">${s.dp.code}</span>
+                            <p class="text-[10px] text-slate-600 truncate" title="${s.dp.label}">${s.dp.label}</p>
+                        </div>
+                        ${s.das.map(d => `
+                            <div class="text-[10px] text-slate-500">
+                                <span class="bg-slate-200 text-slate-700 font-mono text-[9px] px-1 rounded">DAS</span>
+                                <strong class="font-mono text-slate-700">${d.code}</strong> ${d.label}
+                            </div>
+                        `).join('')}
+                    </td>
+
+                    <td class="p-3 max-w-[180px]">
+                        ${s.ccam.length > 0 ? s.ccam.map(c => `
+                            <div>
+                                <span class="bg-indigo-100 text-indigo-800 font-mono text-[9px] font-bold px-1 rounded">CCAM</span>
+                                <strong class="font-mono text-indigo-950">${c.code}</strong>
+                                <p class="text-[10px] text-slate-500 truncate">${c.label}</p>
+                            </div>
+                        `).join('') : `<span class="text-rose-600 text-[10px] font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">Aucun acte codé</span>`}
+                    </td>
+
+                    <td class="p-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="badge-ghm text-white font-mono text-xs font-bold px-2 py-0.5 rounded shadow-xs">${s.ghm}</span>
+                            <span class="bg-tealwater-100 text-tealwater-900 font-mono text-[10px] font-bold px-1.5 py-0.5 rounded">Niveau ${s.severity}</span>
+                        </div>
+                        <div class="text-[10px] text-slate-600 mt-0.5">${s.ghmLabel}</div>
+                    </td>
+
+                    <td class="p-3 text-right font-mono font-bold text-tealwater-900 text-sm">
+                        ${s.t2aTarif.toLocaleString('fr-FR')} €
+                    </td>
+
+                    <td class="p-3 text-center">
+                        ${getStatusBadge(s.status)}
+                    </td>
+
+                    <td class="p-3 text-right space-x-1">
+                        <button onclick="openAddCodeModal(${idx})" title="Ajouter Code CIM/CCAM" class="p-1.5 bg-tealwater-100 hover:bg-tealwater-200 text-tealwater-800 rounded-lg transition-all">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            lucide.createIcons();
+        }
+
+        function getStatusBadge(status) {
+            if (status === 'Codé') {
+                return `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">Codé DIM</span>`;
+            } else if (status === 'À contrôler') {
+                return `<span class="bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-bold px-2 py-0.5 rounded-full">À contrôler</span>`;
+            } else {
+                return `<span class="bg-rose-100 text-rose-800 border border-rose-300 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center justify-center gap-1"><i data-lucide="alert-circle" class="w-3 h-3"></i> Erreur DATIM</span>`;
+            }
+        }
+
+        function filterStays() {
+            const query = document.getElementById("searchInput").value.toLowerCase();
+            const status = document.getElementById("filterStatus").value;
+            const service = document.getElementById("filterService").value;
+
+            const filtered = pmsiStays.filter(s => {
+                const matchesQuery = s.patient.toLowerCase().includes(query) ||
+                                     s.ipp.includes(query) ||
+                                     s.nda.includes(query) ||
+                                     s.dp.code.toLowerCase().includes(query) ||
+                                     s.dp.label.toLowerCase().includes(query);
+
+                const matchesStatus = (status === 'ALL' || s.status === status);
+                const matchesService = (service === 'ALL' || s.service === service);
+
+                return matchesQuery && matchesStatus && matchesService;
+            });
+
+            renderRUMTable(filtered);
+        }
+
+        function renderDATIMAlerts() {
+            const container = document.getElementById("datimAlertsList");
+            container.innerHTML = `
+                <div class="p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start justify-between gap-3">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-rose-600 text-white text-[10px] font-mono font-bold px-1.5 py-0.2 rounded">RUM-2026-004</span>
+                            <span class="font-bold text-xs text-rose-950">GIRARD Françoise (IPP: 80055102)</span>
+                        </div>
+                        <p class="text-xs text-rose-900 font-medium">Absence d'acte opératoire CCAM enregistré pour un séjour chirurgical (GHM 08C482).</p>
+                        <p class="text-[11px] text-slate-600">Action requise : Ajouter l'acte opératoire de pose de prothèse (ex: NEKA020) pour valider le séjour.</p>
+                    </div>
+                    <button onclick="fixAlert(3)" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shrink-0">Corriger</button>
+                </div>
+
+                <div class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start justify-between gap-3">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-amber-600 text-white text-[10px] font-mono font-bold px-1.5 py-0.2 rounded">RUM-2026-003</span>
+                            <span class="font-bold text-xs text-amber-950">BENOÎT Pierre (IPP: 80010943)</span>
+                        </div>
+                        <p class="text-xs text-amber-900 font-medium">Sévérité GHM Niveau 3 non pleinement documentée par l'un des DAS.</p>
+                        <p class="text-[11px] text-slate-600">Action requise : Vérifier la confirmation biologique de la décompensation cardiaque.</p>
+                    </div>
+                    <button onclick="fixAlert(2)" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shrink-0">Valider DAS</button>
+                </div>
+            `;
+        }
+
+        function fixAlert(index) {
+            if (index === 3) {
+                pmsiStays[3].ccam.push({ code: "NEKA020", label: "Remplacement de l'articulation coxo-fémorale par prothèse totale" });
+                pmsiStays[3].status = "Codé";
+                alert("Acte CCAM NEKA020 ajouté avec succès à Mme GIRARD Françoise ! Statut mis à jour.");
+            } else if (index === 2) {
+                pmsiStays[2].status = "Codé";
+                alert("Niveau de Sévérité 3 validé par le DIM pour M. BENOÎT Pierre !");
+            }
+            renderRUMTable();
+            renderDATIMAlerts();
+            updateKPIs();
+        }
+
+        function switchTab(tabKey) {
+            ['rum', 'controle', 't2a', 'export'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                document.getElementById(`tab-btn-${t}`).className = "w-full text-left px-3 py-2.5 rounded-xl font-medium text-xs flex items-center gap-3 transition-all text-tealwater-200 hover:bg-tealwater-900";
+            });
+
+            document.getElementById(`view-${tabKey}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tabKey}`).className = "w-full text-left px-3 py-2.5 rounded-xl font-medium text-xs flex items-center gap-3 transition-all bg-tealwater-600 text-white font-bold shadow-sm";
+        }
+
+        function openAddCodeModal(idx) {
+            activeStayIndex = idx;
+            document.getElementById("modalAddCode").classList.remove("hidden");
+        }
+
+        function closeCodeModal() {
+            document.getElementById("modalAddCode").classList.add("hidden");
+        }
+
+        function saveCode(e) {
+            e.preventDefault();
+            const type = document.getElementById("codeType").value;
+            const code = document.getElementById("codeVal").value.toUpperCase();
+            const label = document.getElementById("codeLabel").value;
+
+            if (type === "CIM10_DAS") {
+                pmsiStays[activeStayIndex].das.push({ code, label });
+            } else {
+                pmsiStays[activeStayIndex].ccam.push({ code, label });
+            }
+
+            pmsiStays[activeStayIndex].t2aTarif += 450; // Dynamic tariff recalculation simulation
+            renderRUMTable();
+            closeCodeModal();
+            updateKPIs();
+        }
+
+        function updateKPIs() {
+            const totalVal = pmsiStays.reduce((acc, s) => acc + s.t2aTarif, 4873360);
+            document.getElementById("kpiValorisation").innerText = totalVal.toLocaleString('fr-FR') + " €";
+        }
+
+        function exportPMSIXML() {
+            let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<EPMSI_SESSION_EXPORT date="${new Date().toISOString()}" finess="690000124">\n`;
+            xml += `  <Entete>
+    <Logiciel>ATLANTE PMSI v2026.4</Logiciel>
+    <Etablissement>Centre Hospitalier Métropolitain</Etablissement>
+    <Session>M09-2026</Session>
+  </Entete>\n  <ListeRUM>\n`;
+
+            pmsiStays.forEach(s => {
+                xml += `    <RUM id="${s.id}" ipp="${s.ipp}" nda="${s.nda}">\n`;
+                xml += `      <Patient>${s.patient}</Patient>\n`;
+                xml += `      <Service>${s.service}</Service>\n`;
+                xml += `      <DiagnosticPrincipal code="${s.dp.code}">${s.dp.label}</DiagnosticPrincipal>\n`;
+                xml += `      <DiagnosticsAssocies>\n`;
+                s.das.forEach(d => {
+                    xml += `        <DAS code="${d.code}">${d.label}</DAS>\n`;
+                });
+                xml += `      </DiagnosticsAssocies>\n`;
+                xml += `      <ActesCCAM>\n`;
+                s.ccam.forEach(c => {
+                    xml += `        <Acte code="${c.code}">${c.label}</Acte>\n`;
+                });
+                xml += `      </ActesCCAM>\n`;
+                xml += `      <GroupeGHM code="${s.ghm}" severite="${s.severity}">${s.ghmLabel}</GroupeGHM>\n`;
+                xml += `      <ValorisationEuro>${s.t2aTarif}</ValorisationEuro>\n`;
+                xml += `    </RUM>\n`;
+            });
+
+            xml += `  </ListeRUM>\n</EPMSI_SESSION_EXPORT>`;
+
+            const blob = new Blob([xml], { type: 'application/xml' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `pmsi_atlante_rum_export_M09.xml`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        window.onload = function() {
+            lucide.createIcons();
+            renderRUMTable();
+            renderDATIMAlerts();
+        };
+    </script>
+</body>
+</html>
